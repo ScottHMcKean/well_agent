@@ -1,7 +1,18 @@
 catalog: shm
 schema: 3w
-table: well_data
-automl:
-  artifact_path: artifact
-  timeout_min: 30
-  
+download:
+  output_dir: "./3w_dataset"
+  base_url: "https://api.github.com/repos/petrobras/3W/contents"
+  max_files: 10 # Maximum number of files to download (null = all files)
+  max_dirs: 1 # Maximum number of directories to scan (null = all)
+  skip_existing: true # Skip files that already exist
+  delay_seconds: 0.1 # Delay between downloads to be respectful to GitHub
+process:
+  table: well_data
+train:
+  test_ratio: 0.2
+  base_model_name: "hydrate_xgboost"
+deploy:
+  base_hydrate_deploy_name: "hydrate_predict"
+agentify:
+  agent_name: "3w_well_agent"
