@@ -1,0 +1,24 @@
+# Databricks job for downloading 3W dataset
+resources:
+  jobs:
+    download_job:
+      name: download_3w_dataset
+
+      parameters:
+        - name: config_path
+          default: "config.yaml"
+
+      tasks:
+        - task_key: download
+          environment_key: default
+          notebook_task:
+            notebook_path: ../src/1_download.ipynb
+            base_parameters:
+              config_path: "{{job.parameters.config_path}}"
+
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "3"
+            dependencies:
+              - ../dist/*.whl

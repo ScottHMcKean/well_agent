@@ -1,5 +1,5 @@
 import pytest
-from src.utils import DotDict, DotConfig
+from hydrate.utils import DotDict, DotConfig
 
 
 @pytest.fixture
@@ -36,11 +36,11 @@ def test_dotdict_nested_returns_dotdict(sample_dict):
 
 def test_dotconfig_loads_config():
     """Test that DotConfig loads config.yaml and provides dot notation access."""
-    config = DotConfig()
+    config = DotConfig("fixtures/config.yaml")
 
     # Should be able to access config values with dot notation
     assert hasattr(config, "download")
-    assert config.download.output_dir == "./3w_dataset"
+    assert config.download.output_dir == "/Volumes/shm/3w/bronze/"
 
 
 def test_dotdict_attribute_error_for_missing_keys():
@@ -49,3 +49,14 @@ def test_dotdict_attribute_error_for_missing_keys():
 
     with pytest.raises(AttributeError):
         _ = dot_dict.non_existent_key
+
+
+def test_dotconfig_with_test_config_fixture(test_config_file):
+    """Example test using the shared test config fixture."""
+    config = DotConfig(test_config_file)
+    
+    # Verify the test config structure
+    assert config.catalog == "test_catalog"
+    assert config.schema == "test_schema" 
+    assert config.download.output_dir == "test_download"
+    assert config.download.max_files == 2

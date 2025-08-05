@@ -4,33 +4,17 @@ bundle:
   name: hydrate
   uuid: e9bfe4f2-0059-4f92-b108-87d98a6b6f00
 
+artifacts:
+  python_artifact:
+    type: whl
+    build: uv build --wheel
+
 include:
   - resources/*.yml
   - resources/*/*.yml
 
-# Configure what artifacts to upload
-artifacts:
-  notebooks:
-    type: notebooks
-    files:
-      - source: "*.ipynb"
-
-  libraries:
-    type: whl
-    build: "uv build"
-
-# Upload config files and other assets
-sync:
-  include:
-    - "config*.yaml"
-    - "src/"
-
 targets:
   dev:
-    # The default target uses 'mode: development' to create a development copy.
-    # - Deployed resources get prefixed with '[dev my_user_name]'
-    # - Any job schedules and triggers are paused by default.
-    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
     default: true
     workspace:
@@ -40,7 +24,6 @@ targets:
     mode: production
     workspace:
       host: https://adb-984752964297111.11.azuredatabricks.net
-      # We explicitly deploy to /Workspace/Users/scott.mckean@databricks.com to make sure we only have a single copy.
       root_path: /Workspace/Users/scott.mckean@databricks.com/.bundle/${bundle.name}/${bundle.target}
     permissions:
       - user_name: scott.mckean@databricks.com

@@ -62,3 +62,38 @@ This sets up an agent to use the deployed models and datasets via Unity Catalog 
 7. For documentation on the Databricks asset bundles format used
    for this project, and for CI/CD configuration, see
    https://docs.databricks.com/dev-tools/bundles/index.html.
+
+# The 3W Dataset
+
+The 3W Dataset is the first realistic and publicly available dataset designed to benchmark machine learning techniques for undesirable rare events in oil wells. Developed and released by Petrobras, it includes extensive multivariate time series data labeled by experts to highlight both normal operations and the occurrence of critical events—including hydrate formation in production lines.
+
+Types of Data: Real, simulated, and hand-drawn instances capture a variety of operational scenarios in oil wells.
+
+Purpose: Created to help the development of robust methodologies for detecting rare, undesirable events, such as hydrate formation and blockages, under real-world conditions that include frozen values, missing data, and outliers.
+
+Structure: Composed of multiple Parquet or CSV files, structured by labeled events. Labels indicate event types like “Normal,” “Abrupt Increase of BSW,” and explicitly, “Hydrate in Production Line”.
+
+Features: Key variables in the dataset include downhole and topside pressure, temperature readings, flow rates, and valve positions—crucial for diagnosing hydrate risk and production anomalies.
+
+License: Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0), so you are free to use, modify, and redistribute with attribution.
+
+##Hydrate Production in Well Lines
+Gas hydrates are solid, ice-like compounds that can form in flowlines under low temperature and high pressure—common in deepwater oil and gas production. If hydrates accumulate, they can block pipelines and halt production, representing a significant operational and safety risk.
+
+Typical Operational States in 3W Data:
+- Open (Normal Production): All production valves open, no auxiliary operation—risk of hydrate formation is managed within operational parameters.
+
+- Shut-in: One or more production path valves are closed—risk for hydrate formation increases if fluids cool down.
+
+- Flushing Diesel/Gas: Injection of diesel (or gas) circulates to displace water/hydrocarbons and mitigate hydrate formation.
+
+- Bullheading: Diesel or gas pushed via topside to clear lines, further reducing hydrate risk.
+
+- Closed With Diesel/Gas: System filled with diesel/gas post-flushing; substantially reduces the likelihood of hydrate formation.
+
+- Depressurization: Lowering line pressure after shut-in to further suppress hydrate formation.
+
+Hydrate Formation Considerations:
+- [Primary Factors](https://pubs.acs.org/doi/10.1021/acsomega.2c02278): Low temperature, high pressure, and the presence of water in the flowline.
+
+- Mitigation: Use of thermodynamic/kinetic inhibitors, thermal insulation, line depressurization, or mechanical operations to prevent or clear blockages.

@@ -2,37 +2,16 @@ import pytest
 import tempfile
 import yaml
 from pathlib import Path
-from src.download import DatasetDownloader
-from src.utils import DotConfig, load_config
+from hydrate.download import DatasetDownloader
+from hydrate.utils import DotConfig, load_config
 
 
-@pytest.fixture
-def test_config_file():
-    """Create a temporary config file for testing."""
-    config_content = {
-        "download": {
-            "output_dir": "test_download",
-            "max_files": 2,
-            "max_dirs": 1,
-            "skip_existing": True,
-            "delay_seconds": 0.05,
-            "base_url": "https://api.github.com/repos/petrobras/3W/contents",
-        }
-    }
-
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-        yaml.dump(config_content, f)
-        config_path = f.name
-
-    yield config_path
-
-    # Cleanup
-    Path(config_path).unlink(missing_ok=True)
+# test_config_file fixture is now provided by conftest.py
 
 
 def test_load_config():
     """Test that we can load the main config file."""
-    config = load_config()
+    config = load_config("fixtures/config.yaml")
 
     assert "download" in config
     assert isinstance(config["download"], dict)
@@ -46,7 +25,7 @@ def test_load_config():
 
 def test_dotconfig_with_downloader():
     """Test DotConfig with DatasetDownloader."""
-    config = DotConfig()
+    config = DotConfig("fixtures/config.yaml")
     downloader = DatasetDownloader(config)
 
     # Verify downloader was initialized correctly
@@ -87,7 +66,7 @@ def test_downloader_requires_download_section():
 
 def test_config_validation():
     """Test that the config file has expected structure."""
-    config = load_config()
+    config = load_config("fixtures/config.yaml")
     download_config = config.get("download", {})
 
     # Check that key configuration options are present
@@ -105,7 +84,7 @@ def test_config_validation():
 
 def test_max_files_configuration():
     """Test that max_files configuration works correctly."""
-    config = load_config()
+    config = load_config("fixtures/config.yaml")
     download_config = config.get("download", {})
 
     max_files = download_config.get("max_files")

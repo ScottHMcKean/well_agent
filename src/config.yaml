@@ -1,0 +1,18 @@
+catalog: shm
+schema: 3w
+download:
+  output_dir: "/Volumes/shm/3w/bronze/"
+  base_url: "https://api.github.com/repos/petrobras/3W/contents"
+  max_files: null # Maximum number of files to download (null = all files)
+  max_dirs: null # Maximum number of directories to scan (null = all)
+  skip_existing: true # Skip files that already exist
+  delay_seconds: 0.1 # Delay between downloads to be respectful to GitHub
+process:
+  table: well_data
+train:
+  test_ratio: 0.2
+  base_model_name: "hydrate_xgboost"
+deploy:
+  base_hydrate_deploy_name: "hydrate_predict"
+agentify:
+  agent_name: "3w_well_agent"
