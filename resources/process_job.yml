@@ -1,18 +1,18 @@
 # Databricks job for downloading 3W dataset
 resources:
   jobs:
-    download_job:
-      name: download_job
+    process_job:
+      name: process_job
 
       parameters:
         - name: config_path
           default: "config.yaml"
 
       tasks:
-        - task_key: download
+        - task_key: process
           environment_key: default
           notebook_task:
-            notebook_path: ../src/1_download.ipynb
+            notebook_path: ../src/2_process.ipynb
             base_parameters:
               config_path: "{{job.parameters.config_path}}"
 

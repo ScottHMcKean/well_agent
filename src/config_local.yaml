@@ -1,12 +1,12 @@
 catalog: shm
 schema: 3w
 download:
-  output_dir: "./3w_dataset"
+  output_dir: "../3w_dataset"
   base_url: "https://api.github.com/repos/petrobras/3W/contents"
-  max_files: 10 # Maximum number of files to download (null = all files)
+  max_files: null # Maximum number of files to download (null = all files)
   max_dirs: 1 # Maximum number of directories to scan (null = all)
   skip_existing: true # Skip files that already exist
-  delay_seconds: 0.1 # Delay between downloads to be respectful to GitHub
+  delay_seconds: 0.05 # Delay between downloads to be respectful to GitHub
 process:
   table: well_data
 train:

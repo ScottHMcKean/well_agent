@@ -13,6 +13,8 @@ This job processes the dataset into a single table that we can use for machine l
 ### 3. Train
 This job trains the hydrate prediction model for each well. We split the dataset into three parts: training, validation, and test. We use the validation set to tune the model and the test set to evaluate the model via the agent framework and user testing (since we don't have new data being generated).
 
+We use lightgbm, a tree-based model that is [well proven on the 3W dataset](https://jaschke.folk.ntnu.no/preprints/2021/TuranClassification_PC/009.pdf). Most of the performance in the model training comes from the feature engineering, which is a combination of time series analysis and simple model fitting. 
+
 ### 4. Deploy
 This job deploys the machine learning models.
 

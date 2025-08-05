@@ -2,6 +2,17 @@ import yaml
 from pathlib import Path
 
 
+def get_config_path():
+    """Get config path from job parameters."""
+    try:
+        dbutils.widgets.text("config_path")
+        config_path = dbutils.widgets.get("config_path")
+        assert config_path is not None
+    except:
+        config_path = "config_local.yaml"
+    return config_path
+
+
 def load_config(config_path: str = "config.yaml") -> dict:
     """Load configuration from YAML file."""
     config_file = Path(config_path)
@@ -16,10 +27,7 @@ class DotDict(dict):
     def __getattr__(self, name):
         try:
             value = self[name]
-
-
-
-            
+           
             if isinstance(value, dict):
                 return DotDict(value)
             return value

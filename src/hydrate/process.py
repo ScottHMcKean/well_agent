@@ -44,3 +44,32 @@ def read_nested_parquet_files(
 
     # Combine all DataFrames
     return pd.concat(all_dfs, ignore_index=True)
+
+
+def clean_data(all_data: pd.DataFrame) -> pd.DataFrame:
+    """Clean the data by removing drawn and simulated data and adding well number."""
+    all_data['is_drawn'] = all_data.source_file.str.contains('DRAWN')
+    all_data['is_simulated'] = all_data.source_file.str.contains('SIMULATED')
+    no_class = all_data['class'].isna()
+    no_timestamp = all_data['timestamp'].isna()
+    all_data['well_number'] = all_data['source_file'].str.extract(r'WELL-(\d+)').astype(int)
+    clean_data = all_data[~no_class & ~no_timestamp]
+    return clean_data
+
+
+def add_state_name(df: pd.DataFrame) -> pd.DataFrame:
+    """Add a state name column to the dataframe."""
+    state_names = {
+        0: 'Normal',
+        1: 'Abrupt Increase of BSW',
+        2: 'Spurious Closure of DHSV',
+        3: 'Severe Slugging',
+        4: 'Flow Instability',
+        5: 'Rapid Productivity Loss',
+        6: 'Quick Restriction in PCK',
+        7: 'Scaling in PCK',
+        8: 'Hydrate in Production Line'
+    }
+    df = df.copy()
+    df['state_name'] = df['state'].map(state_names)
+    return df
