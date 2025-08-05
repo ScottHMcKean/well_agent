@@ -36,7 +36,7 @@ def test_dotdict_nested_returns_dotdict(sample_dict):
 
 def test_dotconfig_loads_config():
     """Test that DotConfig loads config.yaml and provides dot notation access."""
-    config = DotConfig("fixtures/config.yaml")
+    config = DotConfig("fixtures/config_test.yaml")
 
     # Should be able to access config values with dot notation
     assert hasattr(config, "download")

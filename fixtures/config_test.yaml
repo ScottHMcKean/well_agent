@@ -8,6 +8,7 @@ download:
   skip_existing: true # Skip files that already exist
   delay_seconds: 0.1 # Delay between downloads to be respectful to GitHub
 process:
+  silver_dir: "/Volumes/shm/3w/silv/"
   table: well_data
 train:
   test_ratio: 0.2

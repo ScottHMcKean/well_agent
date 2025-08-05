@@ -868,6 +868,7 @@ dependencies = [
     { name = "pandas" },
     { name = "pydantic" },
     { name = "requests" },
+    { name = "scikit-learn" },
     { name = "tsfresh" },
 ]
 
@@ -888,6 +889,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.3.0" },
     { name = "pydantic", specifier = "==2.8.2" },
     { name = "requests", specifier = ">=2.32.4" },
+    { name = "scikit-learn", specifier = ">=1.5.0" },
     { name = "tsfresh", specifier = ">=0.20.0" },
 ]
 

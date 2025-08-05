@@ -11,7 +11,7 @@ from hydrate.utils import DotConfig, load_config
 
 def test_load_config():
     """Test that we can load the main config file."""
-    config = load_config("fixtures/config.yaml")
+    config = load_config("fixtures/config_test.yaml")
 
     assert "download" in config
     assert isinstance(config["download"], dict)
@@ -25,7 +25,7 @@ def test_load_config():
 
 def test_dotconfig_with_downloader():
     """Test DotConfig with DatasetDownloader."""
-    config = DotConfig("fixtures/config.yaml")
+    config = DotConfig("fixtures/config_test.yaml")
     downloader = DatasetDownloader(config)
 
     # Verify downloader was initialized correctly
@@ -66,7 +66,7 @@ def test_downloader_requires_download_section():
 
 def test_config_validation():
     """Test that the config file has expected structure."""
-    config = load_config("fixtures/config.yaml")
+    config = load_config("fixtures/config_test.yaml")
     download_config = config.get("download", {})
 
     # Check that key configuration options are present
@@ -84,7 +84,7 @@ def test_config_validation():
 
 def test_max_files_configuration():
     """Test that max_files configuration works correctly."""
-    config = load_config("fixtures/config.yaml")
+    config = load_config("fixtures/config_test.yaml")
     download_config = config.get("download", {})
 
     max_files = download_config.get("max_files")

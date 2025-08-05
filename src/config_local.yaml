@@ -8,8 +8,38 @@ download:
   skip_existing: true # Skip files that already exist
   delay_seconds: 0.05 # Delay between downloads to be respectful to GitHub
 process:
+  silver_dir: "../3w_processed"
   table: well_data
 train:
+  tags:
+    1:
+      tag: "P-PDG"
+      name: "Pressure at the PDG"
+      unit: "Pa"
+    2:
+      tag: "P-TPT"
+      name: "Pressure at the TPT"
+      unit: "Pa"
+    3:
+      tag: "T-TPT"
+      name: "Temperature at the TPT"
+      unit: "degC"
+    4:
+      tag: "P-MON-CKP"
+      name: "Pressure upstream of the PCK"
+      unit: "Pa"
+    5:
+      tag: "T-JUS-CKP"
+      name: "Temperature downstream of the PCK"
+      unit: "degC"
+    6:
+      tag: "P-JUS-CKGL"
+      name: "Pressure downstream of the GLCK"
+      unit: "Pa"
+    7:
+      tag: "QGL"
+      name: "Gas lift flow rate"
+      unit: "sm^3/s"
   test_ratio: 0.2
   base_model_name: "hydrate_xgboost"
 deploy:
