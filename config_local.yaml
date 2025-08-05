@@ -1,7 +1,7 @@
 catalog: shm
 schema: 3w
 download:
-  output_dir: "/Volumes/shm/3w/bronze/"
+  output_dir: "./3w_dataset"
   base_url: "https://api.github.com/repos/petrobras/3W/contents"
   max_files: 10 # Maximum number of files to download (null = all files)
   max_dirs: 1 # Maximum number of directories to scan (null = all)

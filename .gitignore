@@ -1,3 +1,6 @@
+3w_dataset/
+3w_dataset_test/
+
 .databricks/
 build/
 dist/

@@ -8,6 +8,23 @@ include:
   - resources/*.yml
   - resources/*/*.yml
 
+# Configure what artifacts to upload
+artifacts:
+  notebooks:
+    type: notebooks
+    files:
+      - source: "*.ipynb"
+
+  libraries:
+    type: whl
+    build: "uv build"
+
+# Upload config files and other assets
+sync:
+  include:
+    - "config*.yaml"
+    - "src/"
+
 targets:
   dev:
     # The default target uses 'mode: development' to create a development copy.

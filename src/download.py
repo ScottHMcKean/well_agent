@@ -35,10 +35,9 @@ class DatasetDownloader:
         self.download_config = config.download
 
         # Get configuration values with defaults using dot notation
-        self.base_url = getattr(
-            self.download_config,
-            "base_url",
-            "https://api.github.com/repos/petrobras/3W/contents",
+        self.base_url = (
+            self.download_config.base_url
+            or "https://api.github.com/repos/petrobras/3W/contents"
         )
         self.session = requests.Session()
 
@@ -60,7 +59,11 @@ class DatasetDownloader:
             local_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Check if we should skip existing files
-            skip_existing = getattr(self.download_config, "skip_existing", True)
+            skip_existing = (
+                self.download_config.skip_existing
+                if hasattr(self.download_config, "skip_existing")
+                else True
+            )
             if skip_existing and local_path.exists():
                 return True
 
@@ -87,11 +90,15 @@ class DatasetDownloader:
 
         # Get dataset subdirectories
         subdirs = self.get_directory_contents("dataset")
+        print(f"Found {len(subdirs)} total directories")
 
         # Apply max_dirs limit properly
         if max_dirs and max_dirs > 0:
+            print(f"Applying max_dirs limit: {max_dirs}")
             subdirs = subdirs[:max_dirs]
-            print(f"Limiting to first {max_dirs} directories")
+            print(f"Limited to first {max_dirs} directories")
+        else:
+            print("No directory limit applied")
 
         for subdir in subdirs:
             if subdir.get("type") == "dir":
@@ -121,36 +128,44 @@ class DatasetDownloader:
         """Download the dataset according to configuration."""
 
         # Get configuration values using dot notation
-        output_dir = getattr(self.download_config, "output_dir", "3w_dataset")
-        max_files = getattr(self.download_config, "max_files", None)
-        max_dirs = getattr(self.download_config, "max_dirs", None)
-        delay_seconds = getattr(self.download_config, "delay_seconds", 0.1)
+        output_dir = self.download_config.output_dir or "3w_dataset"
+        max_files = self.download_config.max_files
+        max_dirs = self.download_config.max_dirs
+        delay_seconds = self.download_config.delay_seconds or 0.1
 
         output_path = Path(output_dir)
         output_path.mkdir(exist_ok=True)
 
-        print(f"Configuration loaded from injected config object")
+        print(f"Configuration loaded from config")
         print(f"Output directory: {output_dir}")
-        if max_files:
-            print(f"Max files: {max_files}")
+        print(f"Max files setting: {max_files} (type: {type(max_files)})")
+        print(f"Max directories setting: {max_dirs} (type: {type(max_dirs)})")
+
+        if max_files and max_files > 0:
+            print(f"Will limit to {max_files} files")
         else:
-            print("Max files: No limit (downloading all files)")
-        if max_dirs:
-            print(f"Max directories: {max_dirs}")
+            print("No file limit (downloading all files)")
+        if max_dirs and max_dirs > 0:
+            print(f"Will limit to {max_dirs} directories")
         else:
-            print("Max directories: No limit (scanning all directories)")
+            print("No directory limit (scanning all directories)")
 
         print(f"Getting file list from 3W dataset...")
 
         # Apply max_dirs limit when getting files
         files = self.get_all_parquet_files(max_dirs=max_dirs)
 
+        print(f"Found {len(files)} total parquet files")
+
         # Apply max_files limit properly
         if max_files and max_files > 0:
+            print(f"Applying max_files limit: {max_files}")
             files = files[:max_files]
-            print(f"Limiting to first {max_files} files")
+            print(f"Limited to first {max_files} files")
+        else:
+            print("No file limit applied")
 
-        print(f"Found {len(files)} parquet files to download")
+        print(f"Will download {len(files)} parquet files")
 
         successful_downloads = 0
         total_size = 0
