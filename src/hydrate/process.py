@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Union, List
 from pyspark.sql import SparkSession, DataFrame as SparkDataFrame
 from pyspark.sql.functions import input_file_name, regexp_extract, col, lit
-from pyspark.sql.types import IntegerType
-
+from pyspark.sql.types import IntegerType, StructType
+from pyspark.sql.functions import when, col, isnan, isnull, regexp_extract
 
 def read_nested_parquet_files(
     root_dir: Union[str, Path], pattern: str = "*.parquet"
@@ -89,19 +89,19 @@ def clean_data(all_data: pd.DataFrame) -> pd.DataFrame:
     """Clean the data by removing drawn and simulated data and adding well number."""
     all_data['is_drawn'] = all_data.source_file.str.contains('DRAWN')
     all_data['is_simulated'] = all_data.source_file.str.contains('SIMULATED')
-    no_class = all_data['class'].isna()
+    no_state = all_data['state'].isna()
     no_timestamp = all_data['timestamp'].isna()
     all_data['well_number'] = all_data['source_file'].str.extract(r'WELL-(\d+)').astype(int)
-    clean_data = all_data[~no_class & ~no_timestamp]
+    clean_data = all_data[~no_state & ~no_timestamp]
     return clean_data
 
 
-def clean_data_spark(all_data: SparkDataFrame) -> SparkDataFrame:
+
+def clean_data_spark(df: SparkDataFrame) -> SparkDataFrame:
     """Clean the data by removing drawn and simulated data and adding well number (Spark version)."""
-    from pyspark.sql.functions import when, col, isnan, isnull, regexp_extract
     
     # Add boolean columns for drawn and simulated data
-    all_data = all_data.withColumn(
+    df = df.withColumn(
         "is_drawn", 
         col("source_file").contains("DRAWN")
     ).withColumn(
@@ -110,18 +110,20 @@ def clean_data_spark(all_data: SparkDataFrame) -> SparkDataFrame:
     )
     
     # Extract well number from source file path
-    all_data = all_data.withColumn(
+    df = df.withColumn(
         "well_number",
         regexp_extract(col("source_file"), r"WELL-(\d+)", 1).cast(IntegerType())
     )
     
-    # Filter out records with null class or timestamp
-    clean_data = all_data.filter(
-        col("class").isNotNull() & 
-        col("timestamp").isNotNull()
+    # Filter out records with null state or timestamp
+    out = df.filter(
+        col("state").isNotNull() & 
+        col("timestamp").isNotNull() &
+        (col("is_drawn") == False) &
+        (col("is_simulated") == False)
     )
     
-    return clean_data
+    return out
 
 
 def add_state_name(df: pd.DataFrame) -> pd.DataFrame:
