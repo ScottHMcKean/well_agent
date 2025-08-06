@@ -45,4 +45,4 @@ train:
 deploy:
   base_hydrate_deploy_name: "hydrate_predict"
 agentify:
-  agent_name: "3w_well_agent"
+  agent_name: "well_agent"
