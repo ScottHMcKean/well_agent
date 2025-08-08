@@ -1,7 +1,7 @@
-# This is a Databricks asset bundle definition for hydrate.
+# This is a Databricks asset bundle definition for well_agent.
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:
-  name: hydrate
+  name: well_agent
   uuid: e9bfe4f2-0059-4f92-b108-87d98a6b6f00
 
 artifacts:

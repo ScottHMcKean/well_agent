@@ -6,6 +6,7 @@ from pyspark.sql.functions import input_file_name, regexp_extract, col, lit
 from pyspark.sql.types import IntegerType, StructType
 from pyspark.sql.functions import when, col, isnan, isnull, regexp_extract
 
+
 def read_nested_parquet_files(
     root_dir: Union[str, Path], pattern: str = "*.parquet"
 ) -> pd.DataFrame:
@@ -50,9 +51,7 @@ def read_nested_parquet_files(
 
 
 def read_nested_parquet_files_spark(
-    root_dir: Union[str, Path],
-    schema: StructType,
-    spark: SparkSession = None
+    root_dir: Union[str, Path], pattern: str = "*.parquet", spark: SparkSession = None
 ) -> SparkDataFrame:
     """Efficiently read all parquet files from a nested directory structure using Spark.
 
@@ -61,7 +60,7 @@ def read_nested_parquet_files_spark(
     adds source file information and handles nested directory structures.
 
     Args:
-        root_dir: Root directory to start searching from (typically a Databricks volume path).  
+        root_dir: Root directory to start searching from (typically a Databricks volume path).
         spark: SparkSession instance. If None, will get or create one.
 
     Returns:
@@ -77,77 +76,75 @@ def read_nested_parquet_files_spark(
     """
     if spark is None:
         spark = SparkSession.builder.getOrCreate()
-    
-    root_dir = str(root_dir).rstrip('/')
-    path_pattern = f"{root_dir}/**/*.parquet"
 
-    df = spark.read.schema(schema).parquet(path_pattern)
+    root_dir = str(root_dir).rstrip("/")
+    path_pattern = f"{root_dir}/**/{pattern}"
+
+    df = spark.read.parquet(path_pattern)
     return df
 
 
 def clean_data(all_data: pd.DataFrame) -> pd.DataFrame:
     """Clean the data by removing drawn and simulated data and adding well number."""
-    all_data['is_drawn'] = all_data.source_file.str.contains('DRAWN')
-    all_data['is_simulated'] = all_data.source_file.str.contains('SIMULATED')
-    no_state = all_data['state'].isna()
-    no_timestamp = all_data['timestamp'].isna()
-    all_data['well_number'] = all_data['source_file'].str.extract(r'WELL-(\d+)').astype(int)
+    all_data["is_drawn"] = all_data.source_file.str.contains("DRAWN")
+    all_data["is_simulated"] = all_data.source_file.str.contains("SIMULATED")
+    no_state = all_data["state"].isna()
+    no_timestamp = all_data["timestamp"].isna()
+    all_data["well_number"] = (
+        all_data["source_file"].str.extract(r"WELL-(\d+)").astype(int)
+    )
     clean_data = all_data[~no_state & ~no_timestamp]
     return clean_data
 
 
-
-def clean_data_spark(df: SparkDataFrame) -> SparkDataFrame:
+def clean_data_spark(all_data: SparkDataFrame) -> SparkDataFrame:
     """Clean the data by removing drawn and simulated data and adding well number (Spark version)."""
-    
+
+    df = all_data
     # Add boolean columns for drawn and simulated data
-    df = df.withColumn(
-        "is_drawn", 
-        col("source_file").contains("DRAWN")
-    ).withColumn(
-        "is_simulated", 
-        col("source_file").contains("SIMULATED")
+    df = df.withColumn("is_drawn", col("source_file").contains("DRAWN")).withColumn(
+        "is_simulated", col("source_file").contains("SIMULATED")
     )
-    
+
     # Extract well number from source file path
     df = df.withColumn(
         "well_number",
-        regexp_extract(col("source_file"), r"WELL-(\d+)", 1).cast(IntegerType())
+        regexp_extract(col("source_file"), r"WELL-(\d+)", 1).cast(IntegerType()),
     )
-    
+
     # Filter out records with null state or timestamp
     out = df.filter(
-        col("state").isNotNull() & 
-        col("timestamp").isNotNull() &
-        (col("is_drawn") == False) &
-        (col("is_simulated") == False)
+        col("state").isNotNull()
+        & col("timestamp").isNotNull()
+        & (col("is_drawn") == False)
+        & (col("is_simulated") == False)
     )
-    
+
     return out
 
 
 def add_state_name(df: pd.DataFrame) -> pd.DataFrame:
     """Add a state name column to the dataframe."""
     state_names = {
-        0: 'Normal',
-        1: 'Abrupt Increase of BSW',
-        2: 'Spurious Closure of DHSV',
-        3: 'Severe Slugging',
-        4: 'Flow Instability',
-        5: 'Rapid Productivity Loss',
-        6: 'Quick Restriction in PCK',
-        7: 'Scaling in PCK',
-        8: 'Hydrate in Production Line'
+        0: "Normal",
+        1: "Abrupt Increase of BSW",
+        2: "Spurious Closure of DHSV",
+        3: "Severe Slugging",
+        4: "Flow Instability",
+        5: "Rapid Productivity Loss",
+        6: "Quick Restriction in PCK",
+        7: "Scaling in PCK",
+        8: "Hydrate in Production Line",
     }
     df = df.copy()
-    df['state_name'] = df['state'].map(state_names)
+    df["state_name"] = df["state"].map(state_names)
     return df
 
 
 def add_state_name_spark(df: SparkDataFrame) -> SparkDataFrame:
     """Add a state name column to the Spark dataframe."""
     from pyspark.sql.functions import when, col
-    
+
     # Create a when/otherwise chain for state name mapping
     state_name_expr = (
         when(col("state") == 0, "Normal")
@@ -161,28 +158,26 @@ def add_state_name_spark(df: SparkDataFrame) -> SparkDataFrame:
         .when(col("state") == 8, "Hydrate in Production Line")
         .otherwise("Unknown")
     )
-    
+
     return df.withColumn("state_name", state_name_expr)
 
 
 def process_well_data_spark(
-    root_dir: Union[str, Path],
-    spark: SparkSession = None,
-    pattern: str = "*.parquet"
+    root_dir: Union[str, Path], spark: SparkSession = None, pattern: str = "*.parquet"
 ) -> SparkDataFrame:
     """Complete processing pipeline for well data using Spark.
-    
+
     This function combines reading, cleaning, and enriching well data in a single
     pipeline optimized for large datasets using Spark's distributed processing.
-    
+
     Args:
         root_dir: Root directory containing the parquet files (e.g., Databricks volume path).
         spark: SparkSession instance. If None, will get or create one.
         pattern: File pattern to match. Defaults to "*.parquet".
-    
+
     Returns:
         Processed Spark DataFrame with all transformations applied.
-        
+
     Example:
         >>> from pyspark.sql import SparkSession
         >>> spark = SparkSession.builder.appName("WellDataProcessing").getOrCreate()
@@ -191,11 +186,11 @@ def process_well_data_spark(
     """
     # Read all parquet files
     df = read_nested_parquet_files_spark(root_dir, pattern, spark)
-    
+
     # Clean the data
     df = clean_data_spark(df)
-    
+
     # Add state names
     df = add_state_name_spark(df)
-    
+
     return df

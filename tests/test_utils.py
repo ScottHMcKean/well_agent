@@ -1,5 +1,5 @@
 import pytest
-from hydrate.utils import DotDict, DotConfig
+from well_agent.utils import DotDict, DotConfig
 
 
 @pytest.fixture
@@ -54,9 +54,9 @@ def test_dotdict_attribute_error_for_missing_keys():
 def test_dotconfig_with_test_config_fixture(test_config_file):
     """Example test using the shared test config fixture."""
     config = DotConfig(test_config_file)
-    
+
     # Verify the test config structure
     assert config.catalog == "test_catalog"
-    assert config.schema == "test_schema" 
+    assert config.schema == "test_schema"
     assert config.download.output_dir == "test_download"
     assert config.download.max_files == 2

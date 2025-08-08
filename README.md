@@ -41,7 +41,7 @@ This sets up an agent to use the deployed models and datasets via Unity Catalog 
 
     This deploys everything that's defined for this project.
     For example, the default template would deploy a job called
-    `[dev yourname] hydrate_job` to your workspace.
+    `[dev yourname] well_agent_job` to your workspace.
     You can find that job by opening your workpace and clicking on **Workflows**.
 
 4. Similarly, to deploy a production copy, type:
@@ -50,7 +50,7 @@ This sets up an agent to use the deployed models and datasets via Unity Catalog 
    ```
 
    Note that the default job from the template has a schedule that runs every day
-   (defined in resources/hydrate.job.yml). The schedule
+   (defined in resources/*.yml). The schedule
    is paused when deploying in development mode (see
    https://docs.databricks.com/dev-tools/bundles/deployment-modes.html).
 

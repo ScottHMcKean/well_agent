@@ -2,8 +2,8 @@ import pytest
 import tempfile
 import yaml
 from pathlib import Path
-from hydrate.download import DatasetDownloader
-from hydrate.utils import DotConfig, load_config
+from well_agent.download import DatasetDownloader
+from well_agent.utils import DotConfig, load_config
 
 
 # test_config_file fixture is now provided by conftest.py

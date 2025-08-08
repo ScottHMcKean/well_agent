@@ -27,7 +27,7 @@ class DotDict(dict):
     def __getattr__(self, name):
         try:
             value = self[name]
-           
+
             if isinstance(value, dict):
                 return DotDict(value)
             return value
