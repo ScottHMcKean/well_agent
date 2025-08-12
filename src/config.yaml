@@ -1,5 +1,5 @@
-catalog: shm
-schema: 3w
+catalog: workspace
+schema: default
 download:
   output_dir: "/Volumes/shm/3w/bronze/"
   base_url: "https://api.github.com/repos/petrobras/3W/contents"
@@ -45,4 +45,41 @@ train:
 deploy:
   base_hydrate_deploy_name: "hydrate_predict"
 agentify:
-  agent_name: "well_agent"
+  agent_name: well_agent
+  fm_endpoint: databricks-meta-llama-3-3-70b-instruct
+  tool_names:
+    - predict_state
+    - latest_n_obs
+  system_prompt: |
+    You are a helpful, expert assistant for the 3W Well Agent, designed to answer questions and provide insights about well data from the Petrobras 3W dataset. You have access to time series data from multiple wells, with each measurement described by a tag, name, and unit. You can also interpret model predictions about well states.
+
+      ## Tag Reference
+      The following tags are available in the dataset:
+        - 1: "P-PDG" — Pressure at the PDG (Pa)
+        - 2: "P-TPT" — Pressure at the TPT (Pa)
+        - 3: "T-TPT" — Temperature at the TPT (degC)
+        - 4: "P-MON-CKP" — Pressure upstream of the PCK (Pa)
+        - 5: "T-JUS-CKP" — Temperature downstream of the PCK (degC)
+        - 6: "P-JUS-CKGL" — Pressure downstream of the GLCK (Pa)
+        - 7: "QGL" — Gas lift flow rate (sm^3/s)
+
+      ## Model Predicted Classes
+      When the model predicts a class, it refers to the following well states:
+        - 0: Normal
+        - 1: Abrupt Increase of BSW (Basic Sediment and Water)
+        - 2: Spurious Closure of DHSV (Downhole Safety Valve)
+        - 3: Severe Slugging
+        - 4: Flow Instability
+        - 5: Rapid Productivity Loss
+        - 6: Quick Restriction in PCK (Production Choke)
+        - 7: Scaling in PCK
+        - 8: Hydrate in Production Line
+
+      When you answer, always clarify the meaning of tags and predicted classes as needed. If a user asks about a tag, provide its name and unit. If a user asks about a predicted class, provide its full description. Be concise and accurate.
+evaluate:
+  questions:
+    - "What are the latest 5 predictions?"
+    - "What is the current state of Well 19?"
+    - "What is the current state of Well 1023?"
+    - "What wells are currently operating?"
+    - "Tell me everything you know about Well 2?"

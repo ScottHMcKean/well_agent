@@ -31,34 +31,14 @@ set_uc_function_client(client)
 ############################################
 # Define your LLM endpoint and system prompt
 ############################################
-LLM_ENDPOINT_NAME = "databricks-claude-sonnet-4"
-llm = ChatDatabricks(endpoint=LLM_ENDPOINT_NAME)
+config = mlflow.models.ModelConfig(development_config='config.yaml')
+llm_endpoint_name = config.get("agentify").get("fm_endpoint")
+system_prompt = config.get("agentify").get("system_prompt")
+tool_names = config.get("agentify").get("tool_names")
+catalog = config.get("catalog")
+schema = config.get("schema")
 
-system_prompt = """You are a helpful, expert assistant for the 3W Well Agent, designed to answer questions and provide insights about well data from the Petrobras 3W dataset. You have access to time series data from multiple wells, with each measurement described by a tag, name, and unit. You can also interpret model predictions about well states.
-
-    ## Tag Reference
-    The following tags are available in the dataset:
-      - 1: "P-PDG" — Pressure at the PDG (Pa)
-      - 2: "P-TPT" — Pressure at the TPT (Pa)
-      - 3: "T-TPT" — Temperature at the TPT (degC)
-      - 4: "P-MON-CKP" — Pressure upstream of the PCK (Pa)
-      - 5: "T-JUS-CKP" — Temperature downstream of the PCK (degC)
-      - 6: "P-JUS-CKGL" — Pressure downstream of the GLCK (Pa)
-      - 7: "QGL" — Gas lift flow rate (sm^3/s)
-
-    ## Model Predicted Classes
-    When the model predicts a class, it refers to the following well states:
-      - 0: Normal
-      - 1: Abrupt Increase of BSW (Basic Sediment and Water)
-      - 2: Spurious Closure of DHSV (Downhole Safety Valve)
-      - 3: Severe Slugging
-      - 4: Flow Instability
-      - 5: Rapid Productivity Loss
-      - 6: Quick Restriction in PCK (Production Choke)
-      - 7: Scaling in PCK
-      - 8: Hydrate in Production Line
-
-    When you answer, always clarify the meaning of tags and predicted classes as needed. If a user asks about a tag, provide its name and unit. If a user asks about a predicted class, provide its full description. Be concise, accurate, and helpful."""
+llm = ChatDatabricks(endpoint=llm_endpoint_name)
 
 ###############################################################################
 ## Define tools for your agent, enabling it to retrieve data or take actions
@@ -69,13 +49,8 @@ system_prompt = """You are a helpful, expert assistant for the 3W Well Agent, de
 tools = []
 
 # You can use UDFs in Unity Catalog as agent tools
-uc_tool_names = [
-    "shm.3w.predict_state",
-    "shm.3w.latest_n_obs",
-    "shm.3w.most_recent_obs",
-    "shm.3w.well_failure_counts",
-    "shm.3w.well_time_bounds"
-    ]
+uc_tool_names = [f"{catalog}.{schema}.{x}" for x in tool_names]
+print(uc_tool_names)
 uc_toolkit = UCFunctionToolkit(function_names=uc_tool_names)
 tools.extend(uc_toolkit.tools)
 

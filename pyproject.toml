@@ -9,6 +9,7 @@ requires-python = ">= 3.12.0"
 
 dependencies = [
     "databricks-agents",
+    "databricks-sdk",
     "databricks-connect==16.3.2",
     "databricks-langchain==0.6.0",
     "langgraph",
